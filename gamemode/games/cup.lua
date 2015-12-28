@@ -10,7 +10,6 @@ function GAME:Start( sab )
 		local props = {}
 
 		local function MoveTheBarrels()
-			rounds = rounds - 1
 			if rounds == 0 then
 				if wins > 1 then
 					Saboteur.GameEnd( TEAM_PLAYERS )
@@ -19,6 +18,8 @@ function GAME:Start( sab )
 				end
 				return
 			end
+
+			rounds = rounds - 1
 
 			for i = 1, 3 do
 				props[ i ] = ents.Create( "prop_physics" )
