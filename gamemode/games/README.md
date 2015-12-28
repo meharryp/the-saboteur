@@ -1,7 +1,7 @@
 # How to create new games
 1. Create a new lua file and call it whatever you want.
 2. Add properties like so: 
-```
+```lua
 GAME.Name = "My cool game" -- The name of your game
 GAME.Desc = "Hello, world!" -- A short description to tell people how to play it
 GAME.Time = 60 -- The amount of time, in seconds, people have before the game ends
