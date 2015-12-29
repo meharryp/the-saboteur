@@ -8,6 +8,7 @@ local PLAYER = FindMetaTable( "Player" )
 util.AddNetworkString( "SendGameResult" )
 util.AddNetworkString( "SendVote" )
 util.AddNetworkString( "SendRole" )
+util.AddNetworkString( "SendGameData" ) -- Generic data sending net message to clients
 
 -- Gamemode functions
 function GM:PlayerSpawn( ply )
@@ -24,6 +25,16 @@ function Saboteur.GameEnd( team )
 	net.Start( "SendGameResult" )
 	net.WriteBit( team ) -- If we really wanted we could net.ReadBool clientside.
 	net.Broadcast()
+	PrintMessage( HUD_PRINTTALK, Saboteur.GetName( team ) .. " has won!" )
+	timer.Simple( 5, function()
+		Saboteur.CleanUpMap()
+		for k,v in pairs( player.GetAll() ) do
+			v:SetPos( Vector( -1245.733398 - ( k * 100 ), -4552.468750, -192.468750 ) )
+			v:SetEyeAngles( Angle( 0, 90, 0 ) )
+			v:StripWeapons()
+			v:Freeze( true )
+		end
+	end )
 end
 
 function Saboteur.GetSaboteur()
@@ -47,4 +58,24 @@ end
 
 function PLAYER:IsSaboteur()
 	return self.Role == 1
+end
+
+-- Calls GAME:OnGameData( tab ) clientside. Only use when a game is active.
+function PLAYER:SendGameData( ... ) -- There needs to be a better way of doing this, look into it.
+	net.Start( "SendGameData" )
+	net.WriteTable( { ... } )
+	net.Send( self )
+end
+
+-- Overwritten functions
+-- These functions are here to assist in making games easier to create.
+-- To create a persistent prop, hook or timer you should use the Saboteur.* functions.
+
+Saboteur.CreateEnt = Saboteur.CreateEnt or ents.Create
+Saboteur.ActiveEnts = Saboteur.ActiveEnts or {}
+
+function ents.Create( ent )
+	local sEnt = Saboteur.CreateEnt( ent )
+	table.insert( Saboteur.ActiveEnts, sEnt )
+	return sEnt
 end

@@ -10,6 +10,12 @@ function GAME:Start( sab )
 		local props = {}
 
 		local function MoveTheBarrels()
+			for k,v in pairs( player.GetAll() ) do
+				v:StripWeapons()
+				v:SetPos( Vector( 298.126862, -3.012531, -84.010544 ) )
+				v:SetEyeAngles( Angle( 0, 90, 0 ) )
+			end
+
 			if rounds == 0 then
 				if wins > 1 then
 					Saboteur.GameEnd( TEAM_PLAYERS )
@@ -32,6 +38,8 @@ function GAME:Start( sab )
 			end
 
 			local ballProp = math.random( 1, 3 )
+
+			Saboteur.GetSaboteur():SendGameData( "sabData", props[ ballProp ] )
 
 			local ball = ents.Create( "prop_physics" )
 			ball:SetModel( "models/maxofs2d/hover_classic.mdl" )
@@ -65,6 +73,9 @@ function GAME:Start( sab )
 				end )
 
 				timer.Simple( 0.4 * 61, function()
+					for k,v in pairs( player.GetAll() ) do
+						v:Give( "weapon_crowbar" )
+					end
 					PrintMessage( HUD_PRINTTALK, "Hit the correct barrel with your crowbar!" )
 					hook.Remove( "Think", "MoveBarrels" )
 					for k,v in pairs( props ) do
@@ -91,6 +102,8 @@ function GAME:Start( sab )
 								ball:Spawn()
 								ball:SetCollisionGroup( COLLISION_GROUP_DEBRIS )
 								ball:GetPhysicsObject():SetVelocity( Vector( math.random( 100, 500 ), math.random( 100, 500 ), math.random( 100, 500 ) ) )
+
+								wins = wins + 1
 							else
 								PrintMessage( HUD_PRINTTALK, "You lose!" )
 								hook.Remove( "EntityTakeDamage", "SelectBarrel" )
@@ -114,5 +127,14 @@ function GAME:Start( sab )
 		MoveTheBarrels()
 	else
 		chat.AddText( "Client game loaded." ) -- todo: hud
+	end
+end
+
+function GAME:OnGameData( tab )
+	if tab[ 1 ] == "sabData" then
+		hook.Add( "PreDrawHalos", "ShowCorrectBarrel", function()
+			halo.Add( { tab[ 2 ] }, Color( 0, 255, 0 ) )
+		end )
+		chat.AddText( "Prevent the players for chosing the highlighted barrel, but don't act too suspicous." )
 	end
 end
