@@ -1,5 +1,6 @@
 "the-saboteur"
 {
+	"maps"			"^gm_"
 	"base"			"base"
 	"title"			"The Saboteur"
 	"menusystem"	"1"
